@@ -15,9 +15,7 @@ module Network.TUNTAP (
 
     TAP,
     Packet,
-    MACAddr,
-    mkMACAddr,
-    unMACAddr,
+    DevMAC,
 
     readTAP,
     writeTAP,
@@ -40,18 +38,14 @@ import Control.Exception
 data TAPDesc
 data EthernetFrame
 
--- | A MACAddr is a hardware address 48 bits long.
-newtype MACAddr = MACAddr [Word8]
+-- | A DevMAC is a hardware address 48 bits long.
+type DevMAC = [Word8]
 
 -- | Expects a single argument -- a list 6 Word8's long
-mkMACAddr :: [Word8] -> MACAddr
-mkMACAddr m = case length m of
-                   6 -> MACAddr m
-                   _ -> error "A MACAddr is 6 bytes! No more! No less!"
-
--- | Get the list behind the MACAddr
-unMACAddr :: MACAddr -> [Word8]
-unMACAddr (MACAddr m) = m
+mkDevMAC :: [Word8] -> [Word8]
+mkDevMAC m = case length m of
+                   6 -> m
+                   _ -> error "A DevMAC is 6 bytes! No more! No less!"
 
 -- A TAP device desciptor
 newtype TAP = TAP (Ptr TAPDesc)
@@ -96,10 +90,10 @@ setMask :: TAP -> Word32 -> IO CInt
 setMask (TAP p) m = set_mask_ffi p (fromIntegral m)
 
 -- |Get the MAC address assigned to the TAP device
-getMAC :: TAP -> IO MACAddr
+getMAC :: TAP -> IO DevMAC
 getMAC (TAP p) = allocaArray 6 g
     where g m = do get_mac_ffi p m
-                   peekArray 6 m >>= (return . mkMACAddr . (map fromIntegral))
+                   peekArray 6 m >>= (return . mkDevMAC . (map fromIntegral))
 
 -- |Read a packet from the TAP device
 readTAP :: TAP -> IO Packet
@@ -171,7 +165,7 @@ foreign import CALLCONV safe "help.h set_ip" set_ip_ffi :: (Ptr TAPDesc) -> CUIn
 -- int32_t set_mask(tap_desc_t * td, uint32_t mask);
 foreign import CALLCONV safe "help.h set_mask" set_mask_ffi :: (Ptr TAPDesc) -> CUInt -> IO CInt
 
--- int32_t get_mac(tap_desc_t * td, MACAddr mac);
+-- int32_t get_mac(tap_desc_t * td, DevMAC mac);
 foreign import CALLCONV safe "help.h get_mac" get_mac_ffi :: (Ptr TAPDesc) -> (Ptr CUChar) -> IO CInt
 
 -- int32_t read_tap(tap_desc_t * td, int8_t * buf, int32_t len)
