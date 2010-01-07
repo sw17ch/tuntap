@@ -23,6 +23,7 @@ module Network.TUNTAP (
     withTAP,
 ) where
 
+import Control.Exception
 import Foreign.C.Types
 import Foreign.C.String
 import Foreign.Ptr
@@ -31,9 +32,6 @@ import Foreign.Marshal.Array
 import Data.Word
 import qualified Data.ByteString.Internal as BI
 import qualified Data.ByteString as BS
-
-import Control.Monad
-import Control.Exception
 
 data TAPDesc
 data EthernetFrame
@@ -127,19 +125,11 @@ writeTAP (TAP t) p = withForeignPtr pkt $ \pkt' -> do
 -- |Accept an action and an MTU. Allocate a TAP and
 -- pass it to the action. Clean up when finished with
 -- the action.
-withTAP :: Int -> (TAP -> IO a) -> IO ()
-withTAP m a = do
-    tap <- start
-
-    openTAP tap "scurry0"
-    setMTU tap m
-    bringUp tap
-    a tap -- the passed action
-    closeTAP tap
-    finish tap
-
-    return ()
-
+withTAP :: String -> Int -> (TAP -> IO a) -> IO a
+withTAP n m a =
+  bracket start finish $ \tap ->
+    bracket_ (openTAP tap n) (closeTAP tap) $
+      setMTU tap m >> bringUp tap >> a tap
 
 -- tap_desc_t * init_tap();
 foreign import CALLCONV safe "help.h init_tap" init_tap_ffi :: IO (Ptr TAPDesc)
