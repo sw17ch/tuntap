@@ -1,0 +1,43 @@
+Name: tuntap
+Synopsis: Interface to TUN/TAP drivers.
+Description: TUN/TAP is a virtual network adapter supported by serveral
+             operating systems.
+Version: 0.0.1
+License: BSD3
+License-File: LICENSE
+Author: John Van Enk <vanenkj@gmail.com>
+Maintainer: John Van Enk <vanenkj@gmail.com>
+Stability: experimental
+Category: Network
+Cabal-Version: >= 1.6
+Build-Type: Simple
+Package-URL: http://github.com/sw17ch/tuntap
+
+Library
+    Build-Depends: base >= 4 && < 5,
+                   bytestring >= 0.9.1.4 && < 0.10
+
+    Exposed-Modules:
+        Network.TUNTAP
+
+    ghc-options:        -Wall
+    cc-options:         -Wall
+    hs-source-dirs:     src
+
+    if os(mingw32)
+        c-sources:          cbits/help-win.c
+        extra-libraries:    Iphlpapi, ws2_32
+        cc-options:         -D MINGW32
+        cpp-options:        -DCALLCONV=stdcall
+
+    if os(linux)
+        build-depends:      unix >= 2.3.0.0
+        c-sources:          cbits/help-linux.c
+        cc-options:         -D LINUX
+        cpp-options:        -DCALLCONV=ccall
+
+    if os(darwin) || os(freebsd)
+        build-depends:      unix >= 2.3.0.0
+        c-sources:          cbits/help-bsd.c
+        cc-options:         -D BSD
+        cpp-options:        -DCALLCONV=ccall
