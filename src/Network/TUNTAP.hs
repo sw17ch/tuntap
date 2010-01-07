@@ -33,7 +33,6 @@ import Data.Word
 import qualified Data.ByteString.Internal as BI
 import qualified Data.ByteString as BS
 
-data TAPDesc
 data EthernetFrame
 
 -- | A DevMAC is a hardware address 48 bits long.
@@ -46,7 +45,7 @@ mkDevMAC m = case length m of
                    _ -> error "A DevMAC is 6 bytes! No more! No less!"
 
 -- A TAP device desciptor
-newtype TAP = TAP (Ptr TAPDesc)
+data TAP = TAP (Ptr TAP)
     deriving (Show)
 
 maxPktSize :: Int
@@ -132,34 +131,34 @@ withTAP n m a =
       setMTU tap m >> bringUp tap >> a tap
 
 -- tap_desc_t * init_tap();
-foreign import CALLCONV safe "help.h init_tap" init_tap_ffi :: IO (Ptr TAPDesc)
+foreign import CALLCONV safe "help.h init_tap" init_tap_ffi :: IO (Ptr TAP)
 
 -- void finish_tap(tap_desc_t * td);
-foreign import CALLCONV safe "help.h finish_tap" finish_tap_ffi   :: (Ptr TAPDesc) -> IO CInt
+foreign import CALLCONV safe "help.h finish_tap" finish_tap_ffi   :: (Ptr TAP) -> IO CInt
 
 -- int32_t open_tap(tap_desc_t * td);
-foreign import CALLCONV safe "help.h open_tap" open_tap_ffi :: (Ptr TAPDesc) -> CString -> IO CInt
+foreign import CALLCONV safe "help.h open_tap" open_tap_ffi :: (Ptr TAP) -> CString -> IO CInt
 
 -- int32_t close_tap(tap_desc_t * td);
-foreign import CALLCONV safe "help.h close_tap" close_tap_ffi :: (Ptr TAPDesc) -> IO CInt
+foreign import CALLCONV safe "help.h close_tap" close_tap_ffi :: (Ptr TAP) -> IO CInt
 
 -- int32_t bring_up_tap(tap_desc_t * td);
-foreign import CALLCONV safe "help.h bring_up_tap" bring_up_tap_ffi :: (Ptr TAPDesc) -> IO CInt
+foreign import CALLCONV safe "help.h bring_up_tap" bring_up_tap_ffi :: (Ptr TAP) -> IO CInt
 
 -- int32_t set_mtu(tap_desc_t * td, uint32_t mtu);
-foreign import CALLCONV safe "help.h set_mtu" set_mtu_ffi :: (Ptr TAPDesc) -> CUInt -> IO CInt
+foreign import CALLCONV safe "help.h set_mtu" set_mtu_ffi :: (Ptr TAP) -> CUInt -> IO CInt
 
 -- int32_t set_ip(tap_desc_t * td, uint32_t ip);
-foreign import CALLCONV safe "help.h set_ip" set_ip_ffi :: (Ptr TAPDesc) -> CUInt -> IO CInt
+foreign import CALLCONV safe "help.h set_ip" set_ip_ffi :: (Ptr TAP) -> CUInt -> IO CInt
 
 -- int32_t set_mask(tap_desc_t * td, uint32_t mask);
-foreign import CALLCONV safe "help.h set_mask" set_mask_ffi :: (Ptr TAPDesc) -> CUInt -> IO CInt
+foreign import CALLCONV safe "help.h set_mask" set_mask_ffi :: (Ptr TAP) -> CUInt -> IO CInt
 
 -- int32_t get_mac(tap_desc_t * td, DevMAC mac);
-foreign import CALLCONV safe "help.h get_mac" get_mac_ffi :: (Ptr TAPDesc) -> (Ptr CUChar) -> IO CInt
+foreign import CALLCONV safe "help.h get_mac" get_mac_ffi :: (Ptr TAP) -> (Ptr CUChar) -> IO CInt
 
 -- int32_t read_tap(tap_desc_t * td, int8_t * buf, int32_t len)
-foreign import CALLCONV safe "help.h read_tap" read_tap_ffi :: (Ptr TAPDesc) -> (Ptr EthernetFrame) -> CInt -> IO CInt
+foreign import CALLCONV safe "help.h read_tap" read_tap_ffi :: (Ptr TAP) -> (Ptr EthernetFrame) -> CInt -> IO CInt
 
 -- int32_t write_tap(tap_desc_t * td, const int8_t * buf, int32_t len)
-foreign import CALLCONV safe "help.h write_tap" write_tap_ffi :: (Ptr TAPDesc) -> (Ptr EthernetFrame) -> CInt -> IO CInt
+foreign import CALLCONV safe "help.h write_tap" write_tap_ffi :: (Ptr TAP) -> (Ptr EthernetFrame) -> CInt -> IO CInt
