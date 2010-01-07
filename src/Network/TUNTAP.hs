@@ -55,7 +55,7 @@ maxPktSize :: Int
 maxPktSize = 1560
 
 -- | Read/Written to the TUN/TAP device.
-newtype Packet = Packet BS.ByteString deriving (Show)
+type Packet = BS.ByteString
     
 -- |Allocate a TAP resource
 start :: IO TAP
@@ -109,12 +109,12 @@ readTAP (TAP t) = do
                 _ -> return len
           mk p l = let p' = castForeignPtr p
                        l' = fromIntegral l
-                   in Packet $ BI.fromForeignPtr p' 0 l'
+                   in BI.fromForeignPtr p' 0 l'
           mps = fromIntegral maxPktSize
 
 -- |Write a packet to the TAP device
 writeTAP :: TAP -> Packet -> IO CInt
-writeTAP (TAP t) (Packet p) = withForeignPtr pkt $ \pkt' -> do
+writeTAP (TAP t) p = withForeignPtr pkt $ \pkt' -> do
     wlen <- write_tap_ffi t pkt' (fromIntegral len)
     return wlen
     where (pkt,len) = let (p',o,l) = BI.toForeignPtr p
