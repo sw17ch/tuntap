@@ -2,7 +2,7 @@ Name: tuntap
 Synopsis: Interface to TUN/TAP drivers.
 Description: TUN/TAP is a virtual network adapter supported by serveral
              operating systems.
-Version: 0.0.2
+Version: 0.0.2.1
 License: BSD3
 License-File: LICENSE
 Author: John Van Enk <vanenkj@gmail.com>
