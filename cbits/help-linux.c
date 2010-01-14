@@ -83,6 +83,10 @@ int32_t close_tap(tap_desc_t * td)
     {
         close(td->desc);
     }
+    if (0 <= rd->sock)
+    {
+        close(td->sock);
+    }
 
     return 0;
 }
