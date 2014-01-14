@@ -114,10 +114,8 @@ writeTAP :: TAP -> Packet -> IO CInt
 writeTAP (TAP t) p = withForeignPtr pkt $ \pkt' -> do
     wlen <- write_tap_ffi t pkt' (fromIntegral len)
     return wlen
-    where (pkt,len) = let (p',o,l) = BI.toForeignPtr p
-                      in case o of
-                              0 -> error $ "Got an offset of " ++ show o
-                              _ -> (castForeignPtr p',l)
+    where (pkt,len) = let (p',_,l) = BI.toForeignPtr p
+                      in (castForeignPtr p',l)
 
 -- Some bracketing functions
     
