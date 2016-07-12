@@ -35,7 +35,7 @@ void finish_tap(tap_desc_t * td)
     free(td);
 }
 
-int32_t open_tap(tap_desc_t * td, char * name)
+int32_t open_tap(tap_desc_t * td, char * name, int type)
 {
     char * dev = "/dev/net/tun";
 
@@ -63,7 +63,10 @@ int32_t open_tap(tap_desc_t * td, char * name)
     CLEAR(&(td->ifr));
 
     td->sock = socket(AF_INET, SOCK_DGRAM, 0);
-    td->ifr.ifr_flags = IFF_TAP | IFF_NO_PI;
+    if (type == 0)
+        td->ifr.ifr_flags = IFF_TAP | IFF_NO_PI;
+    else
+        td->ifr.ifr_flags = IFF_TUN | IFF_NO_PI;
 
     if (*name)
         strncpy(td->ifr.ifr_name, name, IFNAMSIZ);

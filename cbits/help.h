@@ -8,7 +8,7 @@ typedef uint8_t MACAddr[6];
 tap_desc_t * init_tap();
 void finish_tap(tap_desc_t * td);
 
-int32_t open_tap(tap_desc_t * td, char * name);
+int32_t open_tap(tap_desc_t * td, char * name, int type);
 int32_t close_tap(tap_desc_t * td);
 int32_t bring_up_tap(tap_desc_t * td);
 int32_t set_mtu(tap_desc_t * td, uint32_t mtu);

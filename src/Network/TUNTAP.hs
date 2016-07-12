@@ -48,6 +48,9 @@ mkDevMAC m = case length m of
 data TAP = TAP (Ptr TAP)
     deriving (Show)
 
+data Type = TAPType
+          | TUNType
+
 maxPktSize :: Int
 maxPktSize = 1560
 
@@ -63,8 +66,9 @@ finish :: TAP -> IO CInt
 finish (TAP p) = finish_tap_ffi p
 
 -- |Open the TAP device
-openTAP :: TAP -> String -> IO CInt
-openTAP (TAP p) n = withCString n (\s -> open_tap_ffi p s)
+openTAP :: TAP -> String -> Type -> IO CInt
+openTAP (TAP p) n TAPType = withCString n (\s -> open_tap_ffi p s 0)
+openTAP (TAP p) n TUNType = withCString n (\s -> open_tap_ffi p s 1)
 
 -- |Close the TAP device
 closeTAP :: TAP -> IO CInt
@@ -125,7 +129,7 @@ writeTAP (TAP t) p = withForeignPtr pkt $ \pkt' -> do
 withTAP :: String -> Int -> (TAP -> IO a) -> IO a
 withTAP n m a =
   bracket start finish $ \tap ->
-    bracket_ (openTAP tap n) (closeTAP tap) $
+    bracket_ (openTAP tap n TAPType) (closeTAP tap) $
       setMTU tap m >> bringUp tap >> a tap
 
 -- tap_desc_t * init_tap();
@@ -135,7 +139,7 @@ foreign import CALLCONV safe "help.h init_tap" init_tap_ffi :: IO (Ptr TAP)
 foreign import CALLCONV safe "help.h finish_tap" finish_tap_ffi   :: (Ptr TAP) -> IO CInt
 
 -- int32_t open_tap(tap_desc_t * td);
-foreign import CALLCONV safe "help.h open_tap" open_tap_ffi :: (Ptr TAP) -> CString -> IO CInt
+foreign import CALLCONV safe "help.h open_tap" open_tap_ffi :: (Ptr TAP) -> CString -> CInt -> IO CInt
 
 -- int32_t close_tap(tap_desc_t * td);
 foreign import CALLCONV safe "help.h close_tap" close_tap_ffi :: (Ptr TAP) -> IO CInt
