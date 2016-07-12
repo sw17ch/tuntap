@@ -14,6 +14,7 @@ module Network.TUNTAP (
     getMAC,
 
     TAP,
+    Type (..),
     Packet,
     DevMAC,
 
