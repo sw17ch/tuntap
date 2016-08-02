@@ -14,6 +14,7 @@ int32_t bring_up_tap(tap_desc_t * td);
 int32_t set_mtu(tap_desc_t * td, uint32_t mtu);
 int32_t set_ip(tap_desc_t * td, uint32_t ip);
 int32_t set_mask(tap_desc_t * td, uint32_t mask);
+int32_t set_ipv6(tap_desc_t * td, uint32_t ip0, uint32_t ip1, uint32_t ip2, uint32_t ip3, uint32_t prefixlen);
 int32_t get_mac(tap_desc_t * td, MACAddr mac);
 
 int32_t read_tap(tap_desc_t * td, uint8_t * buf, int32_t len);
