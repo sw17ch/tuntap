@@ -10,7 +10,8 @@ module Network.TUNTAP (
     setMTU,
     setIP,
     setMask,
-    
+    setIPv6,
+
     getMAC,
 
     TAP,
@@ -91,6 +92,10 @@ setIP (TAP p) a = set_ip_ffi p (fromIntegral a)
 setMask :: TAP -> Word32 -> IO CInt
 setMask (TAP p) m = set_mask_ffi p (fromIntegral m)
 
+-- |Set the IPv6 address of the TAP device
+setIPv6 :: TAP -> (Word32, Word32, Word32, Word32) -> Word32 -> IO CInt
+setIPv6 (TAP p) (a0, a1, a2, a3) pfxlen = set_ipv6_ffi p (fromIntegral a0) (fromIntegral a1) (fromIntegral a2) (fromIntegral a3) (fromIntegral pfxlen)
+
 -- |Get the MAC address assigned to the TAP device
 getMAC :: TAP -> IO DevMAC
 getMAC (TAP p) = allocaArray 6 g
@@ -105,7 +110,7 @@ readTAP (TAP t) = do
     return $ mk pkt len
     where 
           go pkt = do
-            len <- block $ withForeignPtr pkt $ \pkt' -> read_tap_ffi t pkt' mps
+            len <- mask_ $ withForeignPtr pkt $ \pkt' -> read_tap_ffi t pkt' mps
             case len of
                 0 -> go pkt
                 _ -> return len
@@ -156,6 +161,9 @@ foreign import CALLCONV safe "help.h set_ip" set_ip_ffi :: (Ptr TAP) -> CUInt ->
 
 -- int32_t set_mask(tap_desc_t * td, uint32_t mask);
 foreign import CALLCONV safe "help.h set_mask" set_mask_ffi :: (Ptr TAP) -> CUInt -> IO CInt
+
+-- int32_t set_ipv6(tap_desc_t * td, uint32_t ip0, uint32_t ip1, uint32_t ip2, uint32_t ip3, uint32_t prefixlen);
+foreign import CALLCONV safe "help.h set_ipv6" set_ipv6_ffi :: (Ptr TAP) -> CUInt -> CUInt -> CUInt -> CUInt -> CUInt -> IO CInt
 
 -- int32_t get_mac(tap_desc_t * td, DevMAC mac);
 foreign import CALLCONV safe "help.h get_mac" get_mac_ffi :: (Ptr TAP) -> (Ptr CUChar) -> IO CInt

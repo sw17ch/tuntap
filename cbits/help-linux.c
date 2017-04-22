@@ -12,6 +12,7 @@
 #include <sys/ioctl.h>
 #include <linux/if.h>
 #include <linux/if_tun.h>
+#include <linux/ipv6.h>
 
 #include "help.h"
 
@@ -22,6 +23,7 @@ struct tap_desc
 {
     int32_t      desc;
     int32_t      sock;
+    int32_t      sock6;
     struct ifreq ifr;
 };
 
@@ -63,6 +65,7 @@ int32_t open_tap(tap_desc_t * td, char * name, int type)
     CLEAR(&(td->ifr));
 
     td->sock = socket(AF_INET, SOCK_DGRAM, 0);
+    td->sock6 = socket(AF_INET6, SOCK_DGRAM, 0);
     if (type == 0)
         td->ifr.ifr_flags = IFF_TAP | IFF_NO_PI;
     else
@@ -150,6 +153,33 @@ int32_t set_mask(tap_desc_t * td, uint32_t mask)
     if ( ioctl(td->sock, SIOCSIFNETMASK, &td->ifr) < 0)
     {
         fprintf(stderr,"SIOCSIFNETMASK: %s\n", strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
+int32_t set_ipv6(tap_desc_t * td, uint32_t ip0, uint32_t ip1, uint32_t ip2, uint32_t ip3, uint32_t prefixlen)
+{
+	struct in6_ifreq ifr6;
+	CLEAR(&ifr6);
+
+    if (ioctl(td->sock6, SIOGIFINDEX, &td->ifr) < 0)
+    {
+        fprintf(stderr, "SIOGIFINDEX: %s\n", strerror(errno));
+        return -1;
+    }
+
+    ifr6.ifr6_addr.s6_addr32[0] = ip0;
+    ifr6.ifr6_addr.s6_addr32[1] = ip1;
+    ifr6.ifr6_addr.s6_addr32[2] = ip2;
+    ifr6.ifr6_addr.s6_addr32[3] = ip3;
+    ifr6.ifr6_ifindex = td->ifr.ifr_ifindex;
+    ifr6.ifr6_prefixlen = prefixlen;
+
+    if (ioctl(td->sock6, SIOCSIFADDR, &ifr6) < 0)
+    {
+        fprintf(stderr, "SIOCSIFADDR: %s\n", strerror(errno));
         return -1;
     }
 
